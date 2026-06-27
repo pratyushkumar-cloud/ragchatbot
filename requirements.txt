@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+langchain
+langchain-community
+langchain-groq
+langchain-huggingface
+faiss-cpu
+tiktoken
+requests
+beautifulsoup4
+streamlit
+pypdf
+sentence-transformers
+python-dotenv
