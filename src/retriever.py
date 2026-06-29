@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-def get_retriever(k: int = 4) -> Any:
+def get_retriever(k: int = 6) -> Any:
     """Initialize and return FAISS retriever with top k chunks"""
     vector_dir = os.getenv("VECTOR_DIR", "vectorstore")
     embedding_model = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
@@ -21,7 +21,7 @@ def get_retriever(k: int = 4) -> Any:
         vector_dir=vector_dir
     )
     
-    retriever = vs_manager.get_retriever(k=k, score_threshold=0.3)
+    retriever = vs_manager.get_retriever(k=k, score_threshold=0.2)
     
     logger.info(f"Retriever initialized successfully with k={k}")
     return retriever

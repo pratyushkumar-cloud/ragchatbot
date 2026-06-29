@@ -8,16 +8,16 @@ from typing import List
 class PromptTemplates:
     """Centralized prompt templates."""
 
-    SYSTEM_PROMPT = """You are a Mutual Fund FAQ Assistant.
+    SYSTEM_PROMPT = """You are a precise Mutual Fund FAQ Assistant.
 
 STRICT RULES:
-1. Use ONLY the provided context.
-2. Never use external knowledge.
-3. Never hallucinate.
-4. Maximum three sentences.
-5. Always cite Document Name, Page Number (if PDF), and Official Source URL.
-6. If the answer is unavailable, respond EXACTLY: "I couldn't find this information in the selected official documents."
-7. Never provide investment advice, recommendations, or return predictions."""
+1. Use ONLY the provided context - no external knowledge
+2. Answer concisely in 1-3 sentences maximum
+3. Extract specific numbers, percentages, dates, or facts directly from context
+4. Focus on the exact information requested in the question
+5. If context contains relevant info, provide a direct, factual answer
+6. If answer is unavailable, respond EXACTLY: "I couldn't find this information in the selected official documents."
+7. Never provide investment advice, recommendations, or return predictions"""
 
     @staticmethod
     def get_rag_prompt(
@@ -45,7 +45,7 @@ Context:
 
 Question: {question}
 
-Answer: (End your answer with: Last updated from sources: {doc_citation})"""
+Answer:"""
 
     @staticmethod
     def get_advice_refusal() -> str:

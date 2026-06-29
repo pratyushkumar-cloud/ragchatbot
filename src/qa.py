@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import datetime
 from typing import Dict, Any, List
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-retriever = get_retriever(k=4)
+retriever = get_retriever(k=6)
 llm = ChatGroq(
     model=os.getenv("LLM_MODEL", "llama-3.3-70b-versatile"),
     temperature=float(os.getenv("LLM_TEMPERATURE", "0")),
@@ -27,11 +28,11 @@ def answer_query(question: str) -> Dict[str, Any]:
     if Guardrails.is_advice_question(question):
         logger.info("Question detected as advice request - refusing")
         return {
-            "answer": PromptTemplates.get_advice_refusal(),
-            "source": "AMFI",
-            "document": "AMFI",
+            "answer": "I can only provide factual information about mutual funds. I do not provide investment advice, recommendations, or return predictions.",
+            "source": "",
+            "document": "",
             "page": "",
-            "publisher": "AMFI",
+            "publisher": "",
             "last_updated": ""
         }
 
@@ -52,7 +53,9 @@ def answer_query(question: str) -> Dict[str, Any]:
     
     # Deduplicate document names
     unique_documents = list(set([d.metadata.get("title", "Unknown") for d in docs]))
-    document_names = ", ".join(unique_documents)
+    # Filter out "unknown" document names
+    unique_documents = [doc for doc in unique_documents if doc != "Unknown" and doc != ""]
+    document_names = ", ".join(unique_documents) if unique_documents else "official documents"
 
     prompt = PromptTemplates.get_rag_prompt(context, question, document_names)
 
@@ -63,18 +66,34 @@ def answer_query(question: str) -> Dict[str, Any]:
     # Post-processing: filter generic advice
     answer = Guardrails.filter_generic_advice(answer)
     
-    if answer == "I couldn't find this information in the selected official documents.":
+    # Check if answer indicates information not found
+    not_found_indicators = [
+        "couldn't find this information",
+        "information not found",
+        "not available in the provided",
+        "does not contain information"
+    ]
+    
+    is_not_found = any(indicator in answer.lower() for indicator in not_found_indicators)
+    
+    if is_not_found:
         source = ""
         document = ""
         page = ""
         publisher = ""
         last_updated = ""
+        # Clean up the answer to remove the document names suffix
+        answer = "I couldn't find this information in the selected official documents."
     else:
         source = docs[0].metadata.get("source", "")
         document = docs[0].metadata.get("title", "")
         page = str(docs[0].metadata.get("page", "")) if docs[0].metadata.get("page") is not None else ""
         publisher = docs[0].metadata.get("publisher", "")
         last_updated = docs[0].metadata.get("last_updated", "")
+        
+        # Add "Last updated from sources" only if answer was found
+        current_date = datetime.now().strftime("%B %d, %Y")
+        answer = f"{answer} Last updated from sources: {current_date}"
 
     logger.info(f"Answer generated with source: {source}")
     
