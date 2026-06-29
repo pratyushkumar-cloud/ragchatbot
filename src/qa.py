@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from src.retriever import get_retriever
@@ -35,6 +36,8 @@ def answer_query(question):
 
     context = "\n\n".join([f"[Source: {d.metadata.get('source', 'Unknown')}]\n{d.page_content}" for d in docs])
 
+    current_date = datetime.now().strftime("%B %d, %Y")
+    
     prompt = f"""You are a precise mutual fund information assistant. Answer the question using ONLY the provided context.
 
 STRICT RULES:
@@ -44,6 +47,7 @@ STRICT RULES:
 4. Include specific numbers, percentages, or dates from the context
 5. Do not add information not present in the context
 6. No investment advice or recommendations
+7. End with: "Last updated from sources: {current_date}"
 
 Context:
 {context}
@@ -53,10 +57,18 @@ Question: {question}
 Answer:"""
 
     response = llm.invoke(prompt)
-
+    answer = response.content.strip()
+    
+    # If answer indicates information not found, return N/A as source
+    if "not found" in answer.lower() or "information not available" in answer.lower():
+        return {
+            "answer": answer,
+            "source": "N/A"
+        }
+    
     source = docs[0].metadata.get("source", "")
 
     return {
-        "answer": response.content.strip(),
+        "answer": answer,
         "source": source
     }

@@ -1,5 +1,7 @@
 # Sample Q&A for SBI Mutual Fund FAQ Chatbot
 
+**Product Context:** Designed for Groww platform users comparing SBI Mutual Fund schemes.
+
 ## Query 1
 **Question:** What is the expense ratio of SBI Small Cap Fund?
 

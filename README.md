@@ -1,7 +1,9 @@
 # RAG-based Mutual Fund FAQ Chatbot
 
 ## Overview
-A RAG-based FAQ assistant for SBI Mutual Fund schemes that provides factual answers with source citations. The assistant answers questions about expense ratios, exit loads, minimum SIP amounts, lock-in periods, riskometer ratings, benchmarks, and statement downloads.
+A RAG-based FAQ assistant for SBI Mutual Fund schemes that provides factual answers with source citations. This assistant is designed for **Groww** users to quickly get factual information about SBI Mutual Fund schemes.
+
+**Product Context:** Built for Groww platform users comparing SBI Mutual Fund schemes.
 
 **AMC:** SBI Mutual Fund
 
@@ -13,11 +15,13 @@ A RAG-based FAQ assistant for SBI Mutual Fund schemes that provides factual answ
 - ✅ Example questions for quick start
 
 ## Scope
-This chatbot covers 3-5 SBI Mutual Fund schemes:
-- SBI Blue Chip Fund
-- SBI Small Cap Fund
-- SBI Equity Hybrid Fund
-- SBI ELSS Fund
+**AMC**: SBI Mutual Fund
+
+**Schemes Covered** (4 schemes):
+1. SBI Blue Chip Fund (Large Cap)
+2. SBI Small Cap Fund (Small Cap)
+3. SBI Equity Hybrid Fund (Hybrid)
+4. SBI ELSS Fund (ELSS - Tax Saving)
 
 Supported query types:
 - Expense ratio
