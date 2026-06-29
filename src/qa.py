@@ -72,7 +72,7 @@ def answer_query(question: str) -> Dict[str, Any]:
     else:
         source = docs[0].metadata.get("source", "")
         document = docs[0].metadata.get("title", "")
-        page = docs[0].metadata.get("page", "")
+        page = str(docs[0].metadata.get("page", "")) if docs[0].metadata.get("page") is not None else ""
         publisher = docs[0].metadata.get("publisher", "")
         last_updated = docs[0].metadata.get("last_updated", "")
 
