@@ -1,172 +1,222 @@
-import os
+﻿import os
+import csv
+import logging
+from datetime import datetime
 from typing import List, Dict, Any
+from dotenv import load_dotenv
 
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.schema import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from openai import OpenAI  # Grok uses OpenAI-compatible API
+from web_loader import WebLoader
+from vectorstore import VectorStoreManager
+
+# ---------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------
+# Environment
+# ---------------------------------------------------------------------
+
+load_dotenv()
+
+DATA_DIR = os.getenv("DATA_DIR", "data")
+VECTOR_DIR = os.getenv("VECTOR_DIR", "vectorstore")
+SOURCES_FILE = os.path.join(DATA_DIR, "sources.csv")
+
+EMBEDDING_MODEL = os.getenv(
+    "EMBEDDING_MODEL",
+    "sentence-transformers/all-MiniLM-L6-v2"
+)
+
+# ---------------------------------------------------------------------
+# Load Sources Configuration
+# ---------------------------------------------------------------------
 
 
-# ==============================
-# CONFIG
-# ==============================
-CHROMA_DIR = "chroma_db"
+def load_sources() -> List[Dict[str, str]]:
+    """
+    Load sources configuration from CSV file.
 
-EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+    Returns:
+        List of source configurations
+    """
+    sources = []
 
-# Grok Config
-GROK_API_KEY = os.getenv("GROK_API_KEY")
-GROK_BASE_URL = "https://api.x.ai/v1"
-GROK_MODEL = "grok-1"   # or grok-1.5 if enabled
+    if not os.path.exists(SOURCES_FILE):
+        logger.warning(f"sources.csv not found at {SOURCES_FILE}")
+        return sources
+
+    with open(SOURCES_FILE, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            sources.append(row)
+
+    logger.info(f"Loaded {len(sources)} sources from {SOURCES_FILE}")
+    return sources
 
 
-# ==============================
-# RAG CHAIN CLASS
-# ==============================
+# ---------------------------------------------------------------------
+# Load Documents
+# ---------------------------------------------------------------------
 
-class RAGChain:
-    def __init__(self):
-        # Embeddings
-        self.embedding = HuggingFaceEmbeddings(
-            model_name=EMBEDDING_MODEL
-        )
 
-        # Vector DB
-        self.vectordb = Chroma(
-            persist_directory=CHROMA_DIR,
-            embedding_function=self.embedding
-        )
+def load_documents() -> List[Any]:
+    """
+    Load all documents from sources configuration.
+    Supports local PDFs and web scraping.
+    """
+    documents = []
+    sources = load_sources()
+    last_updated = datetime.now().strftime("%Y-%m-%d")
 
-        # Retriever
-        self.retriever = self._build_retriever()
+    from langchain_community.document_loaders import PyPDFLoader
+    web_loader = WebLoader()
 
-        # Grok Client
-        self.client = OpenAI(
-            api_key=GROK_API_KEY,
-            base_url=GROK_BASE_URL
-        )
+    # Load local PDFs first
+    for file in os.listdir(DATA_DIR):
+        if file.endswith(".pdf"):
+            logger.info(f"Loading local PDF: {file}")
+            
+            loader = PyPDFLoader(os.path.join(DATA_DIR, file))
+            pdf_docs = loader.load()
+            
+            # Find matching source info
+            source_info = None
+            for source in sources:
+                if source["type"] == "PDF" and file.lower() in source["url"].lower():
+                    source_info = source
+                    break
+            
+            if source_info:
+                for doc in pdf_docs:
+                    doc.metadata.update({
+                        "scheme": source_info["scheme"],
+                        "title": source_info["title"],
+                        "document_type": source_info["document_type"],
+                        "publisher": source_info["publisher"],
+                        "source": source_info["url"],
+                        "url": source_info["url"],
+                        "last_updated": last_updated,
+                        "page": doc.metadata.get("page", "")
+                    })
+            else:
+                for doc in pdf_docs:
+                    doc.metadata.update({
+                        "scheme": "general",
+                        "title": file.replace(".pdf", ""),
+                        "document_type": "PDF",
+                        "publisher": "Unknown",
+                        "source": "",
+                        "url": "",
+                        "last_updated": last_updated,
+                        "page": doc.metadata.get("page", "")
+                    })
+            
+            documents.extend(pdf_docs)
 
-    # ==============================
-    # RETRIEVER (MMR)
-    # ==============================
-    def _build_retriever(self):
-        return self.vectordb.as_retriever(
-            search_type="mmr",
-            search_kwargs={
-                "k": 5,
-                "fetch_k": 20,
-                "lambda_mult": 0.7
-            }
-        )
+    # Scrape web sources
+    for source in sources:
+        if source["type"] != "Web":
+            continue
+            
+        url = source["url"]
+        title = source["title"]
+        publisher = source["publisher"]
+        document_type = source["document_type"]
+        scheme = source["scheme"]
 
-    # ==============================
-    # RETRIEVE DOCS
-    # ==============================
-    def retrieve(self, query: str, filters=None) -> List[Document]:
-        if filters:
-            return self.vectordb.similarity_search(
-                query,
-                k=5,
-                filter=filters
-            )
-        return self.retriever.get_relevant_documents(query)
+        logger.info(f"Scraping web: {title}")
 
-    # ==============================
-    # BUILD CONTEXT
-    # ==============================
-    def _build_context(self, docs: List[Document]) -> str:
-        blocks = []
-
-        for i, doc in enumerate(docs):
-            meta = doc.metadata
-
-            blocks.append(f"""
-[Document {i+1}]
-Source: {meta.get('source')}
-Scheme: {meta.get('scheme')}
-Type: {meta.get('document_type')}
-
-Content:
-{doc.page_content}
-""")
-
-        return "\n\n".join(blocks)
-
-    # ==============================
-    # PROMPT
-    # ==============================
-    def _build_prompt(self, query: str, context: str) -> str:
-        return f"""
-You are a mutual fund assistant.
-
-STRICT RULES:
-- Answer ONLY from context
-- If not found → say "Information not available"
-- Do not guess
-- Prefer exact numbers
-
-CONTEXT:
-{context}
-
-QUESTION:
-{query}
-
-ANSWER:
-"""
-
-    # ==============================
-    # CALL GROK API
-    # ==============================
-    def _call_grok(self, prompt: str) -> str:
-        response = self.client.chat.completions.create(
-            model=GROK_MODEL,
-            messages=[
-                {"role": "system", "content": "You are a financial assistant."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0
-        )
-
-        return response.choices[0].message.content
-
-    # ==============================
-    # MAIN FUNCTION
-    # ==============================
-    def ask(self, query: str, filters=None) -> Dict[str, Any]:
-        docs = self.retrieve(query, filters)
-
-        if not docs:
-            return {
-                "answer": "No relevant documents found",
-                "sources": []
-            }
-
-        context = self._build_context(docs)
-        prompt = self._build_prompt(query, context)
-
-        answer = self._call_grok(prompt)
-
-        return {
-            "answer": answer,
-            "sources": [
-                {
-                    "source": d.metadata.get("source"),
-                    "scheme": d.metadata.get("scheme"),
-                    "type": d.metadata.get("document_type")
+        try:
+            doc = web_loader.load_url(
+                url,
+                metadata={
+                    "scheme": scheme,
+                    "title": title,
+                    "document_type": document_type,
+                    "publisher": publisher,
+                    "source": url,
+                    "url": url,
+                    "last_updated": last_updated,
+                    "page": ""
                 }
-                for d in docs
-            ]
-        }
+            )
+            documents.append(doc)
+
+        except Exception as e:
+            logger.error(f"Failed to scrape {title}: {e}")
+
+    return documents
 
 
-# ==============================
-# TEST
-# ==============================
+# ---------------------------------------------------------------------
+# Chunking
+# ---------------------------------------------------------------------
+
+
+def split_documents(documents: List[Any]) -> List[Any]:
+    """
+    Split documents into chunks.
+    """
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=100,
+        separators=["\n\n", "\n", ". ", " ", ""]
+    )
+    return splitter.split_documents(documents)
+
+
+# ---------------------------------------------------------------------
+# Create Vector Database
+# ---------------------------------------------------------------------
+
+
+def create_vectorstore():
+    """Create vector store from sources configuration."""
+    logger.info("=" * 60)
+    logger.info("Loading Documents")
+    logger.info("=" * 60)
+
+    documents = load_documents()
+
+    logger.info(f"Loaded {len(documents)} documents")
+
+    logger.info("=" * 60)
+    logger.info("Splitting Documents")
+    logger.info("=" * 60)
+
+    chunks = split_documents(documents)
+
+    logger.info(f"Created {len(chunks)} chunks")
+
+    logger.info("=" * 60)
+    logger.info("Generating Embeddings")
+    logger.info("=" * 60)
+
+    vs_manager = VectorStoreManager(
+        embedding_model=EMBEDDING_MODEL,
+        vector_dir=VECTOR_DIR
+    )
+
+    vs_manager.create_vectorstore(chunks, save=True)
+
+    logger.info("=" * 60)
+    logger.info("Vector Store Created Successfully")
+    logger.info("=" * 60)
+    logger.info(f"Saved to: {VECTOR_DIR}")
+
+
+# ---------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------
+
 if __name__ == "__main__":
-    rag = RAGChain()
-
-    result = rag.ask("What is the expense ratio of SBI Bluechip Fund?")
-
-    print("\n🧠 Answer:\n", result["answer"])
-    print("\n📚 Sources:\n", result["sources"])
+    create_vectorstore()

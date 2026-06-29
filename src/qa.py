@@ -1,12 +1,18 @@
 import os
-from datetime import datetime
+import logging
+from typing import Dict, Any, List
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from src.retriever import get_retriever
+from src.prompt import PromptTemplates
+from src.guardrails import Guardrails
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-retriever = get_retriever()
+retriever = get_retriever(k=4)
 llm = ChatGroq(
     model=os.getenv("LLM_MODEL", "llama-3.3-70b-versatile"),
     temperature=float(os.getenv("LLM_TEMPERATURE", "0")),
@@ -14,61 +20,69 @@ llm = ChatGroq(
 )
 
 
-def is_advice_question(q):
-    keywords = ["should i", "best", "recommend", "invest"]
-    return any(k in q.lower() for k in keywords)
-
-
-def answer_query(question):
-    if is_advice_question(question):
+def answer_query(question: str) -> Dict[str, Any]:
+    """Answer a factual question using RAG with source citation"""
+    logger.info(f"Processing question: {question}")
+    
+    if Guardrails.is_advice_question(question):
+        logger.info("Question detected as advice request - refusing")
         return {
-            "answer": "I can only provide factual information. No investment advice.",
-            "source": "AMFI"
+            "answer": PromptTemplates.get_advice_refusal(),
+            "source": "AMFI",
+            "document": "AMFI",
+            "page": "",
+            "publisher": "AMFI",
+            "last_updated": ""
         }
 
     docs = retriever.invoke(question)
     
     if not docs:
+        logger.info("No relevant documents found")
         return {
-            "answer": "I couldn't find relevant information in the documents to answer your question.",
-            "source": "N/A"
+            "answer": "I couldn't find this information in the selected official documents.",
+            "source": "",
+            "document": "",
+            "page": "",
+            "publisher": "",
+            "last_updated": ""
         }
 
     context = "\n\n".join([f"[Source: {d.metadata.get('source', 'Unknown')}]\n{d.page_content}" for d in docs])
-
-    current_date = datetime.now().strftime("%B %d, %Y")
     
-    prompt = f"""You are a precise mutual fund information assistant. Answer the question using ONLY the provided context.
+    # Deduplicate document names
+    unique_documents = list(set([d.metadata.get("title", "Unknown") for d in docs]))
+    document_names = ", ".join(unique_documents)
 
-STRICT RULES:
-1. Answer concisely in 1-3 sentences
-2. Use ONLY factual information from the context
-3. If the context doesn't contain the answer, say "Information not found in the provided documents"
-4. Include specific numbers, percentages, or dates from the context
-5. Do not add information not present in the context
-6. No investment advice or recommendations
-7. End with: "Last updated from sources: {current_date}"
-
-Context:
-{context}
-
-Question: {question}
-
-Answer:"""
+    prompt = PromptTemplates.get_rag_prompt(context, question, document_names)
 
     response = llm.invoke(prompt)
+    
     answer = response.content.strip()
     
-    # If answer indicates information not found, return N/A as source
-    if "not found" in answer.lower() or "information not available" in answer.lower():
-        return {
-            "answer": answer,
-            "source": "N/A"
-        }
+    # Post-processing: filter generic advice
+    answer = Guardrails.filter_generic_advice(answer)
     
-    source = docs[0].metadata.get("source", "")
+    if answer == "I couldn't find this information in the selected official documents.":
+        source = ""
+        document = ""
+        page = ""
+        publisher = ""
+        last_updated = ""
+    else:
+        source = docs[0].metadata.get("source", "")
+        document = docs[0].metadata.get("title", "")
+        page = docs[0].metadata.get("page", "")
+        publisher = docs[0].metadata.get("publisher", "")
+        last_updated = docs[0].metadata.get("last_updated", "")
 
+    logger.info(f"Answer generated with source: {source}")
+    
     return {
         "answer": answer,
-        "source": source
+        "source": source,
+        "document": document,
+        "page": page,
+        "publisher": publisher,
+        "last_updated": last_updated
     }

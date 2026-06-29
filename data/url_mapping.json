@@ -1,6 +1,50 @@
 {
-  "amfi.pdf": "https://www.amfiindia.com",
-  "all-sbimf-schemes-factsheet-(index)-january-2025.pdf": "https://www.sbimf.com/docs/default-source/scheme-factsheets/all-sbimf-schemes-factsheet-(index)-january-2025.pdf",
-  "12146.pdf": "https://portal.amfiindia.com/spages/12146.pdf",
-  "1468401378495.pdf": "https://www.sebi.gov.in/sebi_data/attachdocs/1468401378495.pdf"
+  "all-sbimf-schemes-factsheet-may-2026.pdf": {
+    "url": "https://www.sbimf.com/docs/default-source/scheme-factsheets/all-sbimf-schemes-factsheet-may-2026.pdf",
+    "document_type": "Factsheet",
+    "source": "SBI Mutual Fund"
+  },
+
+  "offer-document-sid-kim.pdf": {
+    "url": "https://www.sbimf.com/offer-document-sid-kim",
+    "document_type": "SID / KIM Repository",
+    "source": "SBI Mutual Fund"
+  },
+
+  "forms.pdf": {
+    "url": "https://www.sbimf.com/forms",
+    "document_type": "Forms & Downloads",
+    "source": "SBI Mutual Fund"
+  },
+
+  "statement-guide.pdf": {
+    "url": "https://online.sbimf.com/statement?id=7",
+    "document_type": "Statement & Tax Documents",
+    "source": "SBI Mutual Fund"
+  },
+
+  "ways-to-invest.pdf": {
+    "url": "https://www.sbimf.com/ways-to-invest",
+    "document_type": "Investor Guide",
+    "source": "SBI Mutual Fund"
+  },
+
+  "amfi.pdf": {
+    "url": "https://www.amfiindia.com",
+    "document_type": "Investor Education",
+    "source": "AMFI"
+  },
+
+  "amfi-riskometer.pdf": {
+    "url": "https://portal.amfiindia.com/spages/12146.pdf",
+    "document_type": "Riskometer",
+    "source": "AMFI"
+  },
+
+  "sebi-mutual-fund-guide.pdf": {
+    "url": "https://www.sebi.gov.in/sebi_data/attachdocs/1468401378495.pdf",
+    "document_type": "Investor Guide",
+    "source": "SEBI"
+  }
 }
+
