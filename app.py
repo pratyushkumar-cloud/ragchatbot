@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 # ---------- Environment Configuration ----------
 load_dotenv()
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+BACKEND_URL = os.getenv("BACKEND_URL")
 
 # ---------- Logo Processing ----------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -89,11 +89,12 @@ div[data-testid="stChatMessage"] {{
 
 div[data-testid="stChatMessage"]:has([data-testid*="user" i]) {{
     background-color: #FFFFFF;
+    border-color: #000000;
 }}
 
 div[data-testid="stChatMessage"]:has([data-testid*="assistant" i]) {{
     background-color: #F0FDF4;
-    border-color: #DCFCE7;
+    border-color: #000000;
 }}
 
 /* Source Verification Boxes */
@@ -154,6 +155,44 @@ div[data-testid="stChatMessage"]:has([data-testid*="assistant" i]) {{
     line-height: 1.5;
     margin-top: 20px;
 }}
+/* --- Enhanced User Chat Input Styling --- */
+/* Outer Container targeting the stickied bottom container */
+div[data-testid="stChatInput"] {{
+    border-radius: 12px !important;
+    padding: 4px !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid {BORDER_COLOR} !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+    transition: all 0.2s ease-in-out;
+}}
+
+/* Container focus state change */
+div[data-testid="stChatInput"]:focus-within {{
+    border-color: {GROWW_GREEN} !important;
+    box-shadow: 0 4px 16px rgba(0, 208, 156, 0.08) !important;
+}}
+
+/* Internal text field overrides */
+div[data-testid="stChatInput"] textarea {{
+    color: #1E293B !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    
+}}
+
+/* Chat Input Send Button Customizations */
+div[data-testid="stChatInput"] button {{
+    background-color: #F8FAFC !important;
+    border-radius: 8px !important;
+    color: #64748B !important;
+    transition: all 0.2s ease;
+}}
+
+/* Active/Hover states for the chat action button */
+div[data-testid="stChatInput"] button:hover {{
+    background-color: {GROWW_GREEN} !important;
+    color: #FFFFFF !important;
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -179,10 +218,11 @@ Facts-only assistant built using **RAG** architecture.
 ---
 
 ### Topics Indexed
-- Expense Ratio Variations
-- Exit Load Timelines
+- Expense Ratio 
+- ELSS lock-in period
 - SIP Minimum Thresholds
-- Lock-in Periods
+- Exit Load
+- Riskometer/benchmark
 """)
     
     st.markdown("---")
