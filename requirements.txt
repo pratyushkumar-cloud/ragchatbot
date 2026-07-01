@@ -4,6 +4,7 @@ langchain
 langchain-community
 langchain-groq
 langchain-huggingface
+langchain-text-splitters
 faiss-cpu
 tiktoken
 requests
@@ -13,3 +14,4 @@ pypdf
 sentence-transformers
 python-dotenv
 playwright
+transformers

@@ -14,16 +14,23 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 retriever = get_retriever(k=6)
-llm = ChatGroq(
-    model=os.getenv("LLM_MODEL", "llama-3.3-70b-versatile"),
-    temperature=float(os.getenv("LLM_TEMPERATURE", "0")),
-    groq_api_key=os.getenv("GROQ_API_KEY")
-)
 
 
 def answer_query(question: str) -> Dict[str, Any]:
     """Answer a factual question using RAG with source citation"""
     logger.info(f"Processing question: {question}")
+    
+    # Debug environment variable loading
+    load_dotenv()
+    api_key = os.getenv("GROQ_API_KEY")
+    logger.info(f"API Key from env: {api_key[:10] if api_key else 'None'}...{api_key[-10:] if api_key else 'None'}")
+    
+    # Initialize LLM with current environment variables
+    llm = ChatGroq(
+        model=os.getenv("LLM_MODEL", "llama-3.3-70b-versatile"),
+        temperature=float(os.getenv("LLM_TEMPERATURE", "0")),
+        groq_api_key=api_key
+    )
     
     if Guardrails.is_advice_question(question):
         logger.info("Question detected as advice request - refusing")

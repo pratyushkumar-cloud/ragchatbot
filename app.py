@@ -1,249 +1,292 @@
-﻿import os
+import os
+import base64
 import requests
 import streamlit as st
 from dotenv import load_dotenv
 
+# ---------- Environment Configuration ----------
 load_dotenv()
-
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
+# ---------- Logo Processing ----------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+logo_path = os.path.join(BASE_DIR, "data/groww_logo.webp")
+
+def get_logo_base64(path):
+    if os.path.exists(path):
+        with open(path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    return None
+
+logo_base64 = get_logo_base64(logo_path)
+
+# ---------- Streamlit Window Configuration ----------
 st.set_page_config(
-    page_title="Mutual Fund FAQ Assistant",
+    page_title="Groww Mutual Fund FAQ Assistant",
     page_icon="📊",
     layout="wide"
 )
 
-# ---------- Custom CSS ----------
-st.markdown("""
+# ---------- Theme Variables ----------
+GROWW_GREEN = "#00D09C"
+GROWW_DARK_GREEN = "#00B386"
+BORDER_COLOR = "#E2E8F0"
+
+# ---------- Comprehensive Responsive CSS ----------
+st.markdown(f"""
 <style>
+/* Global Layout Adaptations */
+.block-container {{
+    padding-top: 1.5rem;
+    padding-bottom: 5rem; 
+    max-width: 1100px;
+}}
 
-.block-container{
-    padding-top:2rem;
-    padding-bottom:2rem;
-}
+/* Header Typography */
+h1 {{
+    font-weight: 700 !important;
+    color: #1E293B !important;
+    letter-spacing: -0.02em;
+    font-size: calc(1.5rem + 1vw) !important;
+    margin-bottom: 4px !important;
+}}
 
-.stChatMessage{
-    border-radius:12px;
-}
+/* Sticky Top Section */
+.top-fixed {{
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    z-index: 99;
+    padding: 8px 0 16px 0;
+    border-bottom: 1px solid {BORDER_COLOR};
+    margin-bottom: 24px;
+}}
 
-.source-box{
-    background:#F4F6F9;
-    padding:10px;
-    border-radius:8px;
-    margin-top:10px;
-}
+.top-caption {{
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}}
 
-.example-btn button{
-    width:100%;
-}
+.suggested-title {{
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 10px;
+}}
 
+/* Streamlit Native Chat Overrides */
+div[data-testid="stChatMessage"] {{
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    border: 1px solid {BORDER_COLOR};
+}}
+
+div[data-testid="stChatMessage"]:has([data-testid*="user" i]) {{
+    background-color: #FFFFFF;
+}}
+
+div[data-testid="stChatMessage"]:has([data-testid*="assistant" i]) {{
+    background-color: #F0FDF4;
+    border-color: #DCFCE7;
+}}
+
+/* Source Verification Boxes */
+.source-box {{
+    background: #FFFFFF;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-top: 14px;
+    border: 1px solid #DFE7E2;
+    border-left: 4px solid {GROWW_GREEN};
+}}
+
+.source-box b {{
+    color: #334155;
+    font-size: 13px;
+    text-transform: uppercase;
+}}
+
+.source-box a {{
+    color: {GROWW_DARK_GREEN} !important;
+    text-decoration: none !important;
+    font-weight: 500;
+    font-size: 14px;
+    word-break: break-all;
+}}
+
+/* Modern Interactive Suggestion Buttons */
+.stButton button {{
+    border-radius: 8px !important;
+    border: 1px solid {BORDER_COLOR} !important;
+    background-color: #FFFFFF !important;
+    color: #334155 !important;
+    font-weight: 500 !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    text-align: left !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+    white-space: normal !important;
+    height: auto !important;
+    min-height: 52px;
+}}
+
+.stButton button:hover {{
+    border-color: {GROWW_GREEN} !important;
+    color: {GROWW_DARK_GREEN} !important;
+    background-color: #F0FDF4 !important;
+}}
+
+/* Sidebar Safe Disclaimer Box */
+.sidebar-disclaimer {{
+    background-color: #F8FAFC;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid {BORDER_COLOR};
+    border-left: 4px solid #64748B;
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.5;
+    margin-top: 20px;
+}}
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- Sidebar ----------
+logo_img = (
+    f'<img src="data:image/webp;base64,{logo_base64}" width="32" style="vertical-align: middle; margin-right: 6px;"/>'
+    if logo_base64 else "📊 "
+)
+
+# ---------- Sidebar Surface Layer ----------
 with st.sidebar:
-
-    st.title("📊 Mutual Fund FAQ")
-
+    st.markdown(f"### {logo_img}Groww", unsafe_allow_html=True)
+    st.title("Mutual Fund FAQ")
+    
     st.markdown("""
-Facts-only assistant built using **RAG**.
+Facts-only assistant built using **RAG** architecture.
 
-### Scope
-
+### Data Scope
 - SBI Mutual Fund
-- Official AMC Pages
-- AMFI
-- SEBI
+- AMC Portal Data
+- AMFI Regulations
+- SEBI Guidelines
 
 ---
 
-### Example Topics
-
-- Expense Ratio
-- Exit Load
-- Minimum SIP
-- Lock-in
-- Riskometer
-- Benchmark
-- Statement Download
-
----
-
-❌ No Investment Advice
+### Topics Indexed
+- Expense Ratio Variations
+- Exit Load Timelines
+- SIP Minimum Thresholds
+- Lock-in Periods
 """)
-
-    if st.button("🗑 Clear Chat"):
+    
+    st.markdown("---")
+    if st.button("🗑 Clear Chat History", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
-# ---------- Header ----------
+    # Fixed placement avoiding chat_input window layout collisons entirely
+    st.markdown("""
+    <div class="sidebar-disclaimer">
+        <b>Regulatory Disclaimer:</b><br>
+        This assistant answers **only factual questions** using official public documents from official sources.
 
-st.title("📊 RAG-Based Mutual Fund FAQ Assistant")
+It **does not provide investment advice, recommendations, or return predictions.
+    </div>
+    """, unsafe_allow_html=True)
 
-st.caption("Facts-only • Official Sources • No Investment Advice")
+# ---------- Main Workspace Header ----------
+st.markdown("<h1>Groww — RAG-Based Mutual Fund FAQ Assistant</h1>", unsafe_allow_html=True)
 
-# ---------- Chat History ----------
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-for msg in st.session_state.messages:
-
-    with st.chat_message(msg["role"]):
-
-        st.markdown(msg["content"])
-
-        if msg["role"] == "assistant" and msg.get("source"):
-
-            source_info = f"<b>Source:</b><br><a href='{msg['source']}' target='_blank'>{msg['source']}</a>"
-            if msg.get("document"):
-                source_info += f"<br><b>Document:</b> {msg['document']}"
-            if msg.get("page"):
-                source_info += f"<br><b>Page:</b> {msg['page']}"
-            if msg.get("publisher"):
-                source_info += f"<br><b>Publisher:</b> {msg['publisher']}"
-            if msg.get("last_updated"):
-                source_info += f"<br><b>Last Updated:</b> {msg['last_updated']}"
-
-            st.markdown(
-                f"""
-<div class="source-box">
-{source_info}
+st.markdown("""
+<div class="top-fixed">
+    <div class="top-caption">
+        🛡️ Facts-only • Official Sources • No Investment Advice
+    </div>
 </div>
-""",
-                unsafe_allow_html=True,
-            )
+""", unsafe_allow_html=True)
 
-# ---------- Suggested Questions ----------
-
-st.markdown("### 💡 Suggested Questions")
-
-col1, col2, col3 = st.columns(3)
-
+# ---------- Suggested Enquiries Block ----------
 examples = [
     "What is the expense ratio of SBI Small Cap Fund?",
     "What is the exit load for SBI Bluechip Fund?",
     "What is the minimum SIP amount for SBI Equity Hybrid Fund?"
 ]
 
-selected = None
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
+st.markdown('<div class="suggested-title">💡 Suggested Enquiries</div>', unsafe_allow_html=True)
+col1, col2, col3 = st.columns(3)
+
+clicked_prompt = None
 with col1:
-    if st.button(examples[0], use_container_width=True):
-        selected = examples[0]
-
+    if st.button(examples[0], key="s1", use_container_width=True):
+        clicked_prompt = examples[0]
 with col2:
-    if st.button(examples[1], use_container_width=True):
-        selected = examples[1]
-
+    if st.button(examples[1], key="s2", use_container_width=True):
+        clicked_prompt = examples[1]
 with col3:
-    if st.button(examples[2], use_container_width=True):
-        selected = examples[2]
+    if st.button(examples[2], key="s3", use_container_width=True):
+        clicked_prompt = examples[2]
 
-# ---------- Chat Input ----------
+# ---------- Chat Execution & Processing ----------
+prompt = st.chat_input("Ask a factual rule or compliance question...")
 
-prompt = st.chat_input("Ask a factual question about SBI Mutual Fund...")
+if clicked_prompt:
+    prompt = clicked_prompt
 
-if selected:
-    prompt = selected
+# Core messaging stack rendering
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+        if msg["role"] == "assistant" and msg.get("source"):
+            st.markdown(f"""
+            <div class="source-box">
+                <b>Source Document:</b><br>
+                <a href="{msg['source']}" target="_blank">{msg['source']}</a>
+            </div>
+            """, unsafe_allow_html=True)
 
 if prompt:
-
-    st.session_state.messages.append(
-        {
-            "role": "user",
-            "content": prompt
-        }
-    )
-
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-
-        with st.spinner("Searching official sources..."):
-
+        with st.spinner("Querying knowledge base..."):
             try:
-
-                response = requests.post(
+                res = requests.post(
                     f"{BACKEND_URL}/ask",
                     json={"question": prompt},
-                    timeout=30,
+                    timeout=30
                 )
-
-                data = response.json()
-
-                answer = data.get(
-                    "answer",
-                    "No answer found."
-                )
-
+                data = res.json()
+                
+                answer = data.get("answer", "No descriptive answer variants located inside current document indexes.")
                 source = data.get("source", "")
-                document = data.get("document", "")
-                page = data.get("page", "")
-                publisher = data.get("publisher", "")
-                last_updated = data.get("last_updated", "")
-
+                
                 st.markdown(answer)
-
                 if source:
-                    source_info = f"<b>Source:</b><br><a href='{source}' target='_blank'>{source}</a>"
-                    if document:
-                        source_info += f"<br><b>Document:</b> {document}"
-                    if page:
-                        source_info += f"<br><b>Page:</b> {page}"
-                    if publisher:
-                        source_info += f"<br><b>Publisher:</b> {publisher}"
-                    if last_updated:
-                        source_info += f"<br><b>Last Updated:</b> {last_updated}"
-                    
-                    st.markdown(
-                        f"""
-<div class="source-box">
-{source_info}
-</div>
-""",
-                        unsafe_allow_html=True,
-                    )
-
-                st.session_state.messages.append(
-                    {
-                        "role": "assistant",
-                        "content": answer,
-                        "source": source,
-                        "document": document,
-                        "page": page,
-                        "publisher": publisher,
-                        "last_updated": last_updated,
-                    }
-                )
-
+                    st.markdown(f"""
+                    <div class="source-box">
+                        <b>Source Document:</b><br>
+                        <a href="{source}" target="_blank">{source}</a>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": answer,
+                    "source": source
+                })
             except Exception as e:
-
-                error_msg = f"Unable to connect to backend.\n\n{e}"
-
-                st.error(error_msg)
-
-                st.session_state.messages.append(
-                    {
-                        "role": "assistant",
-                        "content": error_msg,
-                        "source": "",
-                        "document": "",
-                        "last_updated": "",
-                    }
-                )
-
-# ---------- Footer ----------
-
-st.markdown("---")
-
-st.info(
-    """
-**Disclaimer**
-
-This assistant answers **only factual questions** using official public documents from SBI Mutual Fund, AMFI and SEBI.
-
-It **does not provide investment advice, recommendations, or return predictions.**
-"""
-)
+                st.error(f"Unable to connect to backend: {e}")
+                
+    if clicked_prompt:
+        st.rerun()
