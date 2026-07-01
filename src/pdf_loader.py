@@ -1,118 +1,120 @@
 """
-PDF download and extraction module.
+Production-grade PDF download and extraction module.
 """
 
 import os
 import logging
 import requests
 from typing import List, Optional
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader, UnstructuredPDFLoader
 from langchain_core.documents import Document
+from pypdf import PdfReader
 
-logger = logging.getLogger(__name__)
-
+logger = logging.getLogger(**name**)
 
 class PDFLoader:
-    """Handle PDF download and extraction."""
+"""Handle PDF download and extraction."""
 
-    def __init__(self, download_dir: str = "data"):
-        """
-        Initialize PDF loader.
+```
+def __init__(self, download_dir: str = "data"):
+    self.download_dir = download_dir
+    os.makedirs(download_dir, exist_ok=True)
 
-        Args:
-            download_dir: Directory to save downloaded PDFs
-        """
-        self.download_dir = download_dir
-        os.makedirs(download_dir, exist_ok=True)
+# ---------- PDF VALIDATION ----------
+def _is_valid_pdf(self, path: str) -> bool:
+    try:
+        PdfReader(path)
+        return True
+    except Exception as e:
+        logger.warning(f"Invalid PDF detected: {path} -> {e}")
+        return False
 
-    def download_pdf(
-        self,
-        url: str,
-        filename: Optional[str] = None,
-        timeout: int = 60
-    ) -> str:
-        """
-        Download a PDF from URL.
+# ---------- DOWNLOAD ----------
+def download_pdf(
+    self,
+    url: str,
+    filename: Optional[str] = None,
+    timeout: int = 60
+) -> str:
 
-        Args:
-            url: URL of the PDF
-            filename: Optional custom filename
-            timeout: Download timeout in seconds
+    if not filename:
+        filename = url.split("/")[-1]
+        if not filename.endswith(".pdf"):
+            filename += ".pdf"
 
-        Returns:
-            Path to downloaded file
-        """
-        if not filename:
-            filename = url.split("/")[-1]
-            if not filename.endswith(".pdf"):
-                filename += ".pdf"
+    filepath = os.path.join(self.download_dir, filename)
+    temp_path = filepath + ".tmp"
 
-        filepath = os.path.join(self.download_dir, filename)
+    if os.path.exists(filepath):
+        logger.info(f"PDF already exists: {filepath}")
+        return filepath
 
-        if os.path.exists(filepath):
-            logger.info(f"PDF already exists: {filepath}")
-            return filepath
+    logger.info(f"Downloading PDF from {url}")
 
-        logger.info(f"Downloading PDF from {url}")
+    try:
+        response = requests.get(url, timeout=timeout, stream=True)
+        response.raise_for_status()
 
-        try:
-            response = requests.get(url, timeout=timeout, stream=True)
-            response.raise_for_status()
-
-            with open(filepath, "wb") as f:
-                for chunk in response.iter_content(chunk_size=8192):
+        # Write to temp file first (IMPORTANT)
+        with open(temp_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
                     f.write(chunk)
 
-            logger.info(f"Downloaded PDF to {filepath}")
-            return filepath
+        # Validate before saving
+        if not self._is_valid_pdf(temp_path):
+            os.remove(temp_path)
+            raise ValueError("Downloaded file is not a valid PDF")
 
-        except Exception as e:
-            logger.error(f"Failed to download PDF from {url}: {e}")
-            raise
+        os.rename(temp_path, filepath)
 
-    def load_pdf(
-        self,
-        filepath: str,
-        metadata: Optional[dict] = None
-    ) -> List[Document]:
-        """
-        Load a PDF file and extract text.
+        logger.info(f"Downloaded PDF to {filepath}")
+        return filepath
 
-        Args:
-            filepath: Path to PDF file
-            metadata: Optional metadata to attach to documents
+    except Exception as e:
+        logger.error(f"Failed to download PDF from {url}: {e}")
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+        raise
 
-        Returns:
-            List of Document objects
-        """
-        logger.info(f"Loading PDF: {filepath}")
+# ---------- LOAD ----------
+def load_pdf(
+    self,
+    filepath: str,
+    metadata: Optional[dict] = None
+) -> List[Document]:
 
+    logger.info(f"Loading PDF: {filepath}")
+
+    # Try PyPDF first (fast)
+    try:
         loader = PyPDFLoader(filepath)
         documents = loader.load()
+    except Exception as e:
+        logger.warning(f"PyPDF failed, switching to Unstructured: {e}")
 
-        if metadata:
-            for doc in documents:
-                doc.metadata.update(metadata)
+        try:
+            loader = UnstructuredPDFLoader(filepath)
+            documents = loader.load()
+        except Exception as e2:
+            logger.error(f"Both loaders failed for {filepath}: {e2}")
+            return []  # skip corrupted file safely
 
-        logger.info(f"Extracted {len(documents)} pages from PDF")
-        return documents
+    if metadata:
+        for doc in documents:
+            doc.metadata.update(metadata)
 
-    def load_from_url(
-        self,
-        url: str,
-        filename: Optional[str] = None,
-        metadata: Optional[dict] = None
-    ) -> List[Document]:
-        """
-        Download and load a PDF from URL.
+    logger.info(f"Extracted {len(documents)} pages from PDF")
+    return documents
 
-        Args:
-            url: URL of the PDF
-            filename: Optional custom filename
-            metadata: Optional metadata to attach
+# ---------- MAIN ----------
+def load_from_url(
+    self,
+    url: str,
+    filename: Optional[str] = None,
+    metadata: Optional[dict] = None
+) -> List[Document]:
 
-        Returns:
-            List of Document objects
-        """
-        filepath = self.download_pdf(url, filename)
-        return self.load_pdf(filepath, metadata)
+    filepath = self.download_pdf(url, filename)
+    return self.load_pdf(filepath, metadata)
+```

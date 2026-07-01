@@ -1,20 +1,19 @@
 url,type,scheme,title,publisher,document_type
-https://www.sbimf.com/sbimf-scheme-details/sbi-midcap-fund-34
-https://www.sbimf.com/sbimf-scheme-details/sbi-small-cap-fund-329
-https://www.sbimf.com/sbimf-scheme-details/sbi-large-cap-fund-(formerly-known-as-sbi-bluechip-fund)-43
-https://www.sbimf.com/sbimf-scheme-details/sbi-gold-fund-202
-https://www.sbimf.com/sbimf-scheme-details/sbi-corporate-bond-fund-518
-https://www.sebi.gov.in/legal/regulations/apr-2026/securities-and-exchange-board-of-india-mutual-funds-regulations-2026_100744.html
-https://www.amfiindia.com/investor/knowledge-center-info?zoneName=TypesOfMutualFundSchemes
-https://www.sbimf.com/sbimf-scheme-details/sbi-bse-sensex-index-fund-642
-https://www.sbimf.com/sbimf-scheme-details/sbi-contra-fund-12
-https://www.sbimf.com/sbimf-scheme-details/sbi-elss-tax-saver-fund-(formerly-known-as-sbi-long-term-equity-fund)-3
-https://www.sbimf.com/sbimf-scheme-details/sbi-healthcare-opportunities-fund-11
-https://www.sbimf.com/sbimf-scheme-details/sbi-technology-opportunities-fund-10
-https://www.sbimf.com/sbimf-scheme-details/sbi-banking-and-financial-services-fund-415
-https://www.sbimf.com/sbimf-scheme-details/sbi-equity-minimum-variance-fund-527
-https://www.sbimf.com/sbimf-scheme-details/sbi-multicap-fund-609
-https://www.sbimf.com/sbimf-scheme-details/sbi-automotive-opportunities-fund-650
-https://www.sebi.gov.in/about-sebi.html
-https://www.sbimf.com/sbimf-scheme-details/sbi-conservative-hybrid-fund-26
-https://www.sbimf.com/sbimf-scheme-details/sbi-conservative-hybrid-fund-26
+https://www.sbimf.com/sbimf-scheme-details/sbi-midcap-fund-34,Web,sbi_midcap,SBI Midcap Fund,SBI Mutual Fund,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-small-cap-fund-329,Web,sbi_smallcap,SBI Small Cap Fund,SBI Mutual Fund,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-large-cap-fund-(formerly-known-as-sbi-bluechip-fund)-43,Web,sbi_largecap,SBI Large Cap Fund,SBI Mutual Fund,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-gold-fund-202,Web,sbi_gold,SBI Gold Fund,SBI Mutual Fund,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-corporate-bond-fund-518,Web,sbi_bond,SBI Corporate Bond Fund,SBI Mutual Fund,Web
+https://www.sebi.gov.in/legal/regulations/apr-2026/securities-and-exchange-board-of-india-mutual-funds-regulations-2026_100744.html,Web,sebi_regulations,SEBI MF Regulations,SEBI,Web
+https://www.amfiindia.com/investor/knowledge-center-info?zoneName=TypesOfMutualFundSchemes,Web,amfi_types,Types of Mutual Funds,AMFI,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-bse-sensex-index-fund-642,Web,sbi_index,SBI Sensex Index Fund,SBI Mutual Fund,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-contra-fund-12,Web,sbi_contra,SBI Contra Fund,SBI Mutual Fund,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-elss-tax-saver-fund-(formerly-known-as-sbi-long-term-equity-fund)-3,Web,sbi_elss,SBI ELSS Fund,SBI Mutual Fund,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-healthcare-opportunities-fund-11,Web,sbi_health,SBI Healthcare Fund,SBI Mutual Fund,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-technology-opportunities-fund-10,Web,sbi_tech,SBI Technology Fund,SBI Mutual Fund,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-banking-and-financial-services-fund-415,Web,sbi_banking,SBI Banking Fund,SBI Mutual Fund,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-equity-minimum-variance-fund-527,Web,sbi_variance,SBI Minimum Variance Fund,SBI Mutual Fund,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-multicap-fund-609,Web,sbi_multicap,SBI Multicap Fund,SBI Mutual Fund,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-automotive-opportunities-fund-650,Web,sbi_auto,SBI Automotive Fund,SBI Mutual Fund,Web
+https://www.sebi.gov.in/about-sebi.html,Web,sebi_about,About SEBI,SEBI,Web
+https://www.sbimf.com/sbimf-scheme-details/sbi-conservative-hybrid-fund-26,Web,sbi_hybrid,SBI Conservative Hybrid Fund,SBI Mutual Fund,Web
