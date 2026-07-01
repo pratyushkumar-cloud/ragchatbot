@@ -174,9 +174,9 @@ def load_documents() -> List[Any]:
 
 def split_documents(documents: List[Any]) -> List[Any]:
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=100,
-        separators=["\n\n", "\n", ". ", " ", ""]
+        chunk_size=700,
+        chunk_overlap=150,
+        separators=["\n\n", "\n", ". ", "? ", "! ", "; ", ": ", " ", ""]
     )
     return splitter.split_documents(documents)
 

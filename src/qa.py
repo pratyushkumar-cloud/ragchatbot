@@ -92,11 +92,15 @@ def answer_query(question: str) -> Dict[str, Any]:
         # Clean up the answer to remove the document names suffix
         answer = "I couldn't find this information in the selected official documents."
     else:
-        source = docs[0].metadata.get("source", "")
-        document = docs[0].metadata.get("title", "")
-        page = str(docs[0].metadata.get("page", "")) if docs[0].metadata.get("page") is not None else ""
-        publisher = docs[0].metadata.get("publisher", "")
-        last_updated = docs[0].metadata.get("last_updated", "")
+        # Prioritize web sources for source citation
+        web_docs = [doc for doc in docs if doc.metadata.get("source", "").startswith("http")]
+        selected_doc = web_docs[0] if web_docs else docs[0]
+        
+        source = selected_doc.metadata.get("source", "")
+        document = selected_doc.metadata.get("title", "")
+        page = str(selected_doc.metadata.get("page", "")) if selected_doc.metadata.get("page") is not None else ""
+        publisher = selected_doc.metadata.get("publisher", "")
+        last_updated = selected_doc.metadata.get("last_updated", "")
         
         # Add "Last updated from sources" only if answer was found
         current_date = datetime.now().strftime("%B %d, %Y")

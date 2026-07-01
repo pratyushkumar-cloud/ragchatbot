@@ -29,20 +29,30 @@ def inspect_vectorstore():
     print("-" * 50)
     
     # Get retriever
-    retriever = db.as_retriever(search_kwargs={"k": 3})
+    retriever = db.as_retriever(search_kwargs={"k": 20})
     
-    # Test a query
-    test_query = "What is the expense ratio?"
+    # Test a query for sbi_gold scheme from Groww
+    test_query = "sbi_gold"
     print(f"Testing query: '{test_query}'")
     print("-" * 50)
     
     docs = retriever.invoke(test_query)
     
-    print(f"Found {len(docs)} relevant documents:")
-    for i, doc in enumerate(docs, 1):
-        print(f"\n--- Document {i} ---")
-        print(f"Source: {doc.metadata.get('source', 'Unknown')}")
-        print(f"Content preview: {doc.page_content[:200]}...")
+    # Filter for sbi_gold scheme from Groww web sources
+    gold_web_docs = [doc for doc in docs if doc.metadata.get('scheme') == 'sbi_gold' and doc.metadata.get('source', '').startswith('https://groww.in')]
+    
+    print(f"Found {len(docs)} total documents, {len(gold_web_docs)} from Groww web source:")
+    
+    if gold_web_docs:
+        for i, doc in enumerate(gold_web_docs[:3], 1):
+            print(f"\n--- Document {i} ---")
+            print(f"Source: {doc.metadata.get('source', 'Unknown')}")
+            print(f"URL: {doc.metadata.get('url', 'Unknown')}")
+            print(f"Scheme: {doc.metadata.get('scheme', 'Unknown')}")
+            print(f"Title: {doc.metadata.get('title', 'Unknown')}")
+            print(f"Content: {doc.page_content[:1500]}...")
+    else:
+        print("No Groww web source documents found for sbi_gold scheme.")
     
     print("\n" + "=" * 50)
     print("Vector store inspection complete!")

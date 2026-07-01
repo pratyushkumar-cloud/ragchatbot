@@ -9,27 +9,42 @@ A RAG-based FAQ assistant for SBI Mutual Fund schemes that provides factual answ
 
 ## Features
 - ✅ Facts-only answers from official public pages
-- ✅ Source citation in every answer
+- ✅ Source citation in every answer (prioritizes Groww URLs)
 - ✅ No investment advice (refuses opinionated questions)
-- ✅ Simple, user-friendly interface
+- ✅ Simple, user-friendly interface with Groww branding
 - ✅ Example questions for quick start
+- ✅ Web scraping from Groww mutual fund pages
+- ✅ PDF ingestion from SBI MF factsheets
 
 ## Scope
 **AMC**: SBI Mutual Fund
 
-**Schemes Covered** (4 schemes):
-1. SBI Blue Chip Fund (Large Cap)
-2. SBI Small Cap Fund (Small Cap)
-3. SBI Equity Hybrid Fund (Hybrid)
-4. SBI ELSS Fund (ELSS - Tax Saving)
+**Schemes Covered** (15+ schemes):
+1. SBI Gold Fund Direct Plan Growth
+2. SBI Small Midcap Fund Direct Plan Growth
+3. SBI Contra Fund Direct Plan Growth
+4. SBI Magnum Multiplier Fund Direct Plan Growth
+5. SBI ELSS Tax Saver Fund Direct Plan Growth
+6. SBI Large Cap Fund Direct Plan Growth
+7. SBI Mid Cap Fund Direct Plan Growth
+8. SBI Premier Liquid Fund Direct Plan Growth
+9. SBI Magnum Balanced Fund Direct Plan Growth
+10. SBI Multicap Fund Direct Plan Growth
+11. SBI Nifty Smallcap 250 Index Fund Direct Plan Growth
+12. SBI Flexicap Fund Direct Plan Growth
+13. SBI Quality Fund Direct Plan Growth
+14. SBI Retirement Benefit Fund Direct Plan Growth
+15. SBI Equity Savings Fund Direct Plan Growth
 
 Supported query types:
 - Expense ratio
 - Exit load
-- Minimum SIP amount
+- Minimum SIP/Lumpsum investment
 - Lock-in period (ELSS)
 - Riskometer/benchmark
-- How to download statements
+- Fund size (AUM)
+- NAV information
+- Fund details and objectives
 
 ## Setup Instructions
 
@@ -66,7 +81,7 @@ LLM_TEMPERATURE=0
 
 4. Download official PDF documents from SBI Mutual Fund, AMFI, and SEBI and place them in the `data/` directory.
 
-5. Update the `data/url_mapping.json` file with your PDF filenames and their corresponding source URLs.
+5. Update the `data/sources.csv` file with your source URLs and metadata (scheme, title, publisher, document_type).
 
 6. Run the ingestion script to create the vector store:
 ```bash
@@ -97,20 +112,29 @@ streamlit run app.py
 
 ## Project Structure
 ```
-mf-rag-chatbot/
-├── app.py                 # Streamlit UI
-├── main.py                # FastAPI backend
+ragchatbot/
+├── app.py                 # Streamlit frontend UI
+├── main.py                # FastAPI backend API
 ├── requirements.txt       # Python dependencies
-├── sources.md             # List of 25 source URLs
+├── architecture.md        # System architecture documentation
 ├── sample_qa.md          # Sample Q&A examples
+├── inspect_vectorstore.py # Vector store inspection utility
 ├── data/
-│   ├── url_mapping.json  # PDF to URL mapping
-│   └── *.pdf             # Source documents
+│   ├── sources.csv        # Source URLs and metadata configuration
+│   ├── groww_logo.webp    # Groww logo for UI
+│   └── *.pdf             # Source documents (factsheets, regulations)
 ├── src/
-│   ├── ingest.py         # Document ingestion
-│   ├── retriever.py      # RAG retrieval
-│   └── qa.py            # Question answering logic
-└── vectorstore/          # FAISS vector database
+│   ├── ingest.py         # Document ingestion pipeline
+│   ├── retriever.py      # RAG retrieval logic
+│   ├── qa.py            # Question answering with guardrails
+│   ├── vectorstore.py   # FAISS vector store management
+│   ├── web_loader.py   # Web scraping from Groww
+│   ├── guardrails.py   # Investment advice detection
+│   ├── prompt.py       # LLM prompt templates
+│   ├── metadata.py     # Metadata management
+│   ├── pdf_loader.py   # PDF loading utilities
+│   └── scraper.py      # Web scraping utilities
+└── vectorstore/          # FAISS vector database (generated)
 ```
 
 ## Disclaimer

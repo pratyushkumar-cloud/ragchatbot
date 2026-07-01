@@ -1,19 +1,26 @@
 url,type,scheme,title,publisher,document_type
-https://www.sbimf.com/sbimf-scheme-details/sbi-midcap-fund-34,Web,sbi_midcap,SBI Midcap Fund,SBI Mutual Fund,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-small-cap-fund-329,Web,sbi_smallcap,SBI Small Cap Fund,SBI Mutual Fund,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-large-cap-fund-(formerly-known-as-sbi-bluechip-fund)-43,Web,sbi_largecap,SBI Large Cap Fund,SBI Mutual Fund,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-gold-fund-202,Web,sbi_gold,SBI Gold Fund,SBI Mutual Fund,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-corporate-bond-fund-518,Web,sbi_bond,SBI Corporate Bond Fund,SBI Mutual Fund,Web
-https://www.sebi.gov.in/legal/regulations/apr-2026/securities-and-exchange-board-of-india-mutual-funds-regulations-2026_100744.html,Web,sebi_regulations,SEBI MF Regulations,SEBI,Web
-https://www.amfiindia.com/investor/knowledge-center-info?zoneName=TypesOfMutualFundSchemes,Web,amfi_types,Types of Mutual Funds,AMFI,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-bse-sensex-index-fund-642,Web,sbi_index,SBI Sensex Index Fund,SBI Mutual Fund,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-contra-fund-12,Web,sbi_contra,SBI Contra Fund,SBI Mutual Fund,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-elss-tax-saver-fund-(formerly-known-as-sbi-long-term-equity-fund)-3,Web,sbi_elss,SBI ELSS Fund,SBI Mutual Fund,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-healthcare-opportunities-fund-11,Web,sbi_health,SBI Healthcare Fund,SBI Mutual Fund,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-technology-opportunities-fund-10,Web,sbi_tech,SBI Technology Fund,SBI Mutual Fund,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-banking-and-financial-services-fund-415,Web,sbi_banking,SBI Banking Fund,SBI Mutual Fund,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-equity-minimum-variance-fund-527,Web,sbi_variance,SBI Minimum Variance Fund,SBI Mutual Fund,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-multicap-fund-609,Web,sbi_multicap,SBI Multicap Fund,SBI Mutual Fund,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-automotive-opportunities-fund-650,Web,sbi_auto,SBI Automotive Fund,SBI Mutual Fund,Web
-https://www.sebi.gov.in/about-sebi.html,Web,sebi_about,About SEBI,SEBI,Web
-https://www.sbimf.com/sbimf-scheme-details/sbi-conservative-hybrid-fund-26,Web,sbi_hybrid,SBI Conservative Hybrid Fund,SBI Mutual Fund,Web
+https://groww.in/mutual-funds/sbi-gold-fund-direct-growth,Web,sbi_gold,SBI Gold Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-small-midcap-fund-direct-growth,Web,sbi_small_midcap,SBI Small Midcap Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-contra-fund-direct-growth,Web,sbi_contra,SBI Contra Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-magnum-multiplier-fund-direct-growth,Web,sbi_multiplier,SBI Magnum Multiplier Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-elss-tax-saver-fund-direct-growth,Web,sbi_elss,SBI ELSS Tax Saver Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-large-cap-direct-plan-growth,Web,sbi_largecap,SBI Large Cap Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-mid-cap-direct-plan-growth,Web,sbi_midcap,SBI Mid Cap Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-premier-liquid-fund-direct-growth,Web,sbi_liquid,SBI Premier Liquid Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-magnum-balanced-fund-direct-growth,Web,sbi_balanced,SBI Magnum Balanced Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-multicap-fund-direct-growth,Web,sbi_multicap,SBI Multicap Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-nifty-smallcap-250-index-fund-direct-growth,Web,sbi_smallcap_index,SBI Nifty Smallcap 250 Index Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-flexicap-fund-direct-growth,Web,sbi_flexicap,SBI Flexicap Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-quality-fund-direct-growth,Web,sbi_quality,SBI Quality Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-retirement-benefit-fund-aggressive-plan-direct-growth,Web,sbi_retirement,SBI Retirement Benefit Fund,Groww,Web
+https://groww.in/mutual-funds/sbi-equity-savings-fund-direct-growth,Web,sbi_equity_savings,SBI Equity Savings Fund,Groww,Web
+https://www.sbimf.com/docs/default-source/scheme-factsheets/all-sbimf-schemes-factsheet-may-2026.pdf,PDF,general,All SBI MF Schemes Factsheet May 2026,SBI Mutual Fund,Factsheet
+https://www.sbimf.com/docs/default-source/scheme-factsheets/all-sbimf-schemes-factsheet-april-2026.pdf,PDF,general,All SBI MF Schemes Factsheet April 2026,SBI Mutual Fund,Factsheet
+https://www.sbimf.com/docs/default-source/scheme-factsheets/all-sbimf-schemes-factsheet-march-2026.pdf,PDF,general,All SBI MF Schemes Factsheet March 2026,SBI Mutual Fund,Factsheet
+https://www.sbimf.com/docs/default-source/scheme-factsheets/sbi-mf-passives-(index-etf-fof)-factsheet-may-2026.pdf,PDF,general,SBI MF Passives Factsheet May 2026,SBI Mutual Fund,Factsheet
+https://www.sbimf.com/docs/default-source/scheme-factsheets/sbi-mf-passives-(index-etf-fof)-factsheet-april-2026.pdf,PDF,general,SBI MF Passives Factsheet April 2026,SBI Mutual Fund,Factsheet
+https://www.sbimf.com/docs/default-source/scheme-factsheets/sbi-mf-passives-(index-etf-fof)-factsheet-march-2026.pdf,PDF,general,SBI MF Passives Factsheet March 2026,SBI Mutual Fund,Factsheet
+https://www.amfiindia.com,PDF,general,AMFI Investor Education,AMFI,Investor Education
+https://www.sbimf.com/offer-document-sid-kim,PDF,general,SBI MF SID/KIM Repository,SBI Mutual Fund,SID/KIM
+https://www.sebi.gov.in/sebi_data/attachdocs/1468401378495.pdf,PDF,general,SEBI Mutual Fund Guide,SEBI,Investor Guide
+https://www.sbimf.com/docs/default-source/scheme-factsheets/equity-schemes---scheme-differentiation.pdf,PDF,general,Equity Schemes Differentiation,SBI Mutual Fund,Factsheet
