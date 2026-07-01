@@ -1,12 +1,92 @@
 import os
 import base64
-import requests
 import streamlit as st
 from dotenv import load_dotenv
+from datetime import datetime
+from src.retriever import get_retriever
+from src.prompt import PromptTemplates
+from src.guardrails import Guardrails
+from langchain_groq import ChatGroq
 
 # ---------- Environment Configuration ----------
 load_dotenv()
-BACKEND_URL = os.getenv("BACKEND_URL")
+
+# ---------- Initialize RAG Components ----------
+@st.cache_resource
+def initialize_rag_components():
+    """Initialize retriever and LLM with caching for performance"""
+    retriever = get_retriever(k=6)
+    llm = ChatGroq(
+        model=os.getenv("LLM_MODEL", "llama-3.3-70b-versatile"),
+        temperature=float(os.getenv("LLM_TEMPERATURE", "0")),
+        groq_api_key=os.getenv("GROQ_API_KEY")
+    )
+    return retriever, llm
+
+retriever, llm = initialize_rag_components()
+
+# ---------- QA Logic ----------
+def answer_query(question: str):
+    """Answer a factual question using RAG with source citation"""
+    # Guardrails check
+    if Guardrails.is_advice_question(question):
+        return {
+            "answer": "I can only provide factual information about mutual funds. I do not provide investment advice, recommendations, or return predictions.",
+            "source": ""
+        }
+
+    # Retrieve documents
+    docs = retriever.invoke(question)
+    
+    if not docs:
+        return {
+            "answer": "I couldn't find this information in the selected official documents.",
+            "source": ""
+        }
+
+    # Build context
+    context = "\n\n".join([f"[Source: {d.metadata.get('source', 'Unknown')}]\n{d.page_content}" for d in docs])
+    
+    # Deduplicate document names
+    unique_documents = list(set([d.metadata.get("title", "Unknown") for d in docs]))
+    unique_documents = [doc for doc in unique_documents if doc != "Unknown" and doc != ""]
+    document_names = ", ".join(unique_documents) if unique_documents else "official documents"
+
+    # Generate prompt and get response
+    prompt = PromptTemplates.get_rag_prompt(context, question, document_names)
+    response = llm.invoke(prompt)
+    answer = response.content.strip()
+    
+    # Post-processing
+    answer = Guardrails.filter_generic_advice(answer)
+    
+    # Check if answer indicates information not found
+    not_found_indicators = [
+        "couldn't find this information",
+        "information not found",
+        "not available in the provided",
+        "does not contain information"
+    ]
+    
+    is_not_found = any(indicator in answer.lower() for indicator in not_found_indicators)
+    
+    if is_not_found:
+        answer = "I couldn't find this information in the selected official documents."
+        source = ""
+    else:
+        # Prioritize web sources for source citation
+        web_docs = [doc for doc in docs if doc.metadata.get("source", "").startswith("http")]
+        selected_doc = web_docs[0] if web_docs else docs[0]
+        source = selected_doc.metadata.get("source", "")
+        
+        # Add "Last updated from sources"
+        current_date = datetime.now().strftime("%B %d, %Y")
+        answer = f"{answer} Last updated from sources: {current_date}"
+
+    return {
+        "answer": answer,
+        "source": source
+    }
 
 # ---------- Logo Processing ----------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -254,7 +334,7 @@ st.markdown("""
 # ---------- Suggested Enquiries Block ----------
 examples = [
     "What is the expense ratio of SBI Small Cap Fund?",
-    "What is the exit load for SBI Bluechip Fund?",
+    "What is the exit load of SBI Gold Direct Plan Growth?",
     "What is the minimum SIP amount for SBI Equity Hybrid Fund?"
 ]
 
@@ -301,15 +381,9 @@ if prompt:
     with st.chat_message("assistant"):
         with st.spinner("Querying knowledge base..."):
             try:
-                res = requests.post(
-                    f"{BACKEND_URL}/ask",
-                    json={"question": prompt},
-                    timeout=30
-                )
-                data = res.json()
-                
-                answer = data.get("answer", "No descriptive answer variants located inside current document indexes.")
-                source = data.get("source", "")
+                result = answer_query(prompt)
+                answer = result.get("answer", "No descriptive answer variants located inside current document indexes.")
+                source = result.get("source", "")
                 
                 st.markdown(answer)
                 if source:
@@ -326,7 +400,7 @@ if prompt:
                     "source": source
                 })
             except Exception as e:
-                st.error(f"Unable to connect to backend: {e}")
+                st.error(f"Error processing question: {e}")
                 
     if clicked_prompt:
         st.rerun()

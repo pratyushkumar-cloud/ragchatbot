@@ -90,17 +90,44 @@ python src/ingest.py
 
 ### Running the Application
 
-1. Start the FastAPI backend:
-```bash
-uvicorn main:app --reload
-```
-
-2. In a new terminal, start the Streamlit frontend:
+Start the Streamlit application:
 ```bash
 streamlit run app.py
 ```
 
-3. Open your browser to `http://localhost:8501`
+Open your browser to `http://localhost:8501`
+
+**Note:** The application is now a single-file Streamlit app with integrated RAG pipeline. No separate backend is required.
+
+### Deployment to Streamlit Cloud
+
+1. **Push your code to GitHub** (ensure `.env` is in `.gitignore`)
+
+2. **Create a Streamlit Cloud account** at https://streamlit.io/cloud
+
+3. **Deploy your app**:
+   - Click "New app" in Streamlit Cloud
+   - Connect your GitHub repository
+   - Select the repository and branch
+   - Set the main file path to `app.py`
+
+4. **Add secrets in Streamlit Cloud**:
+   - Go to your app settings
+   - Add the following secrets:
+     ```
+     GROQ_API_KEY=your_groq_api_key_here
+     DATA_DIR=data
+     VECTOR_DIR=vectorstore
+     EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+     LLM_MODEL=llama-3.3-70b-versatile
+     LLM_TEMPERATURE=0
+     ```
+
+5. **Upload data files**:
+   - The `data/` directory with PDFs and `sources.csv`
+   - The `vectorstore/` directory (generated from `python src/ingest.py`)
+
+**Note:** Streamlit Cloud automatically installs dependencies from `requirements.txt`.
 
 ## Known Limitations
 - Only answers questions based on ingested documents

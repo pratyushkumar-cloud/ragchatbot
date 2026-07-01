@@ -3,38 +3,24 @@
 ## Overview
 This RAG-based Mutual Fund FAQ Chatbot uses a Retrieval-Augmented Generation architecture to provide factual answers about SBI Mutual Fund schemes with source citations. The system is designed for Groww platform users and refuses investment advice questions.
 
+**Architecture Type:** Single-file Streamlit application with integrated RAG pipeline for simplified deployment on Streamlit Cloud.
+
 ## Architecture Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        User Interface Layer                      │
+│                    Streamlit Application (app.py)                │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │         Streamlit Frontend (app.py)                      │  │
+│  │         User Interface Layer                              │  │
 │  │  - Chat interface with Groww branding                   │  │
 │  │  - Suggested questions                                   │  │
 │  │  - Source citation display                               │  │
 │  │  - Chat history management                               │  │
 │  └────────────────────┬─────────────────────────────────────┘  │
-│                       │ HTTP POST /ask                         │
-└───────────────────────┼─────────────────────────────────────────┘
-                        │
-┌───────────────────────┼─────────────────────────────────────────┐
-│                       ▼                                          │
-│              API Layer (FastAPI)                                │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │         main.py - FastAPI Backend                         │  │
-│  │  - /ask endpoint for question processing                  │  │
-│  │  - Request/response validation                           │  │
-│  └────────────────────┬─────────────────────────────────────┘  │
 │                       │                                          │
-└───────────────────────┼─────────────────────────────────────────┘
-                        │
-┌───────────────────────┼─────────────────────────────────────────┐
-│                       ▼                                          │
-│              Question Answering Layer                            │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │         qa.py - RAG Pipeline                              │  │
+│  ┌────────────────────┴─────────────────────────────────────┐  │
+│  │         Question Answering Layer (Integrated)             │  │
 │  │  - Guardrails (advice detection)                         │  │
 │  │  - Retrieval from vector store                          │  │
 │  │  - LLM generation with context                          │  │
@@ -104,9 +90,9 @@ This RAG-based Mutual Fund FAQ Chatbot uses a Retrieval-Augmented Generation arc
 
 ## Component Details
 
-### 1. Frontend Layer (Streamlit)
-- **File**: `app.py`
+### 1. Streamlit Application (app.py)
 - **Framework**: Streamlit
+- **Architecture**: Single-file application with integrated RAG pipeline
 - **Features**:
   - Chat interface with Groww branding
   - Suggested questions for quick start
@@ -114,19 +100,10 @@ This RAG-based Mutual Fund FAQ Chatbot uses a Retrieval-Augmented Generation arc
   - Chat history management
   - Responsive CSS styling
   - Clear chat history functionality
+  - Integrated QA logic (no separate backend required)
+- **Caching**: Uses `@st.cache_resource` for retriever and LLM initialization
 
-### 2. API Layer (FastAPI)
-- **File**: `main.py`
-- **Framework**: FastAPI
-- **Endpoint**: `POST /ask`
-- **Functionality**:
-  - Receives user questions
-  - Validates request/response models
-  - Delegates to QA layer
-  - Returns structured responses with metadata
-
-### 3. Question Answering Layer
-- **File**: `qa.py`
+### 2. Question Answering Layer (Integrated in app.py)
 - **Components**:
   - **Guardrails**: Detects and refuses investment advice questions
   - **Retrieval**: Fetches relevant documents from vector store
@@ -134,21 +111,21 @@ This RAG-based Mutual Fund FAQ Chatbot uses a Retrieval-Augmented Generation arc
   - **Citation**: Prioritizes web sources for source URLs
 - **LLM**: Groq - llama-3.3-70b-versatile (temperature=0)
 
-### 4. Retrieval Layer
+### 3. Retrieval Layer
 - **File**: `retriever.py`
 - **Technology**: FAISS vector store
 - **Embedding Model**: sentence-transformers/all-MiniLM-L6-v2
 - **Configuration**: k=6, score_threshold=0.2
 - **Function**: Semantic search over document chunks
 
-### 5. Vector Store Layer
+### 4. Vector Store Layer
 - **File**: `vectorstore.py`
 - **Technology**: FAISS (Facebook AI Similarity Search)
 - **Storage**: Local disk (`vectorstore/` directory)
 - **Dimensions**: 384 (from embedding model)
 - **Features**: Load/save functionality, embedding generation
 
-### 6. Document Ingestion Layer
+### 5. Document Ingestion Layer
 - **File**: `ingest.py`
 - **Components**:
   - **PDF Loading**: PyPDFLoader, UnstructuredPDFLoader (fallback)
@@ -163,7 +140,7 @@ This RAG-based Mutual Fund FAQ Chatbot uses a Retrieval-Augmented Generation arc
   5. Generate embeddings
   6. Create FAISS vector store
 
-### 7. Guardrails Layer
+### 6. Guardrails Layer
 - **File**: `guardrails.py`
 - **Features**:
   - Investment advice detection
@@ -171,7 +148,7 @@ This RAG-based Mutual Fund FAQ Chatbot uses a Retrieval-Augmented Generation arc
   - Not-found response handling
 - **Purpose**: Ensures system only provides factual information
 
-### 8. Data Sources
+### 7. Data Sources
 - **Configuration**: `data/sources.csv`
 - **Web Sources**: Groww mutual fund pages (15 schemes)
 - **PDF Sources**: 
@@ -195,13 +172,12 @@ This RAG-based Mutual Fund FAQ Chatbot uses a Retrieval-Augmented Generation arc
 
 ### Query Flow
 1. **User Input**: User submits question via Streamlit UI
-2. **API Request**: POST to `/ask` endpoint
-3. **Guardrails Check**: Detect investment advice questions
-4. **Retrieval**: Fetch top 6 relevant chunks from FAISS
-5. **Context Building**: Combine retrieved chunks with source metadata
-6. **LLM Generation**: Generate answer using Groq API
-7. **Source Citation**: Prioritize web sources for citation
-8. **Response**: Return answer with source URL
+2. **Guardrails Check**: Detect investment advice questions
+3. **Retrieval**: Fetch top 6 relevant chunks from FAISS
+4. **Context Building**: Combine retrieved chunks with source metadata
+5. **LLM Generation**: Generate answer using Groq API
+6. **Source Citation**: Prioritize web sources for citation
+7. **Response**: Display answer with source URL in UI
 
 ## Key Design Decisions
 
@@ -225,16 +201,18 @@ This RAG-based Mutual Fund FAQ Chatbot uses a Retrieval-Augmented Generation arc
 - **Implementation**: 700-character chunks with 150-character overlap
 - **Benefit**: Maintains context while enabling granular retrieval
 
+### Single-File Architecture
+- **Rationale**: Simplified deployment for Streamlit Cloud
+- **Implementation**: Integrated QA logic directly into Streamlit app
+- **Benefit**: No separate backend required, easier deployment and maintenance
+- **Caching**: Uses Streamlit's `@st.cache_resource` for efficient resource management
+
 ## Technology Stack
 
-### Frontend
-- Streamlit (UI framework)
+### Frontend & Application
+- Streamlit (UI framework + application logic)
 - Custom CSS (styling)
-- Requests (API communication)
-
-### Backend
-- FastAPI (API framework)
-- Pydantic (validation)
+- LangChain (orchestration)
 
 ### RAG Pipeline
 - LangChain (orchestration)
