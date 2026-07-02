@@ -29,8 +29,7 @@ env/
 ENV/
 .venv
 
-# Vector store
-vectorstore/
+
 
 # IDE
 .vscode/
